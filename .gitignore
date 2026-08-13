@@ -1,0 +1,11 @@
+# Secrets — bot token and channel/user IDs. Never commit.
+.env
+
+# Local check-in data
+*.db
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
