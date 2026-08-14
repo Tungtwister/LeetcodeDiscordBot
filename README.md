@@ -21,6 +21,19 @@ a daily nudge in a shared channel if either of you hasn't checked in yet.
 Every night at a configured time, the bot posts in one channel and `@`-mentions
 anyone who hasn't logged a session that day.
 
+## Timezones
+
+`APP_TIMEZONE` controls two things: when the daily reminder fires, and **where the day
+boundary falls** for check-ins and streaks. Set it to the timezone you actually live
+in, never the server's.
+
+This matters because hosted containers run on UTC. If "today" came from the host clock
+(`date.today()`), the day would roll over at 5 PM Pacific / 8 PM Eastern — so an
+evening check-in would be filed under tomorrow, breaking the streak for a day you
+actually practiced, and the reminder would ping people who had already checked in.
+Everything date-related therefore goes through `config.today()`, which resolves the
+date in `APP_TIMEZONE`.
+
 ## Testing the reminder
 
 Rather than waiting until `REMINDER_HOUR`, run `/reminderinfo` to confirm the channel

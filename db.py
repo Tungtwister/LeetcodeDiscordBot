@@ -1,7 +1,9 @@
 import os
 import sqlite3
 from contextlib import contextmanager
-from datetime import date, datetime, timedelta
+from datetime import date, timedelta
+
+from config import now_iso, today
 
 # A relative DB_PATH is resolved against this file's directory, not the current
 # working directory — otherwise the database silently moves depending on where the
@@ -64,14 +66,14 @@ def init_db():
 
 
 def add_session(user_id, username, session_type, topic, difficulty, minutes, notes):
-    today = date.today().isoformat()
-    now = datetime.utcnow().isoformat()
+    session_date = today().isoformat()
+    now = now_iso()
     with get_conn() as conn:
         conn.execute(
             "INSERT INTO sessions "
             "(user_id, username, session_type, topic, difficulty, minutes, notes, session_date, created_at) "
             "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            (user_id, username, session_type, topic, difficulty, minutes, notes, today, now),
+            (user_id, username, session_type, topic, difficulty, minutes, notes, session_date, now),
         )
 
 
@@ -88,7 +90,7 @@ def current_streak(user_id):
     dates = _session_dates(user_id)
     if not dates:
         return 0
-    day = date.today()
+    day = today()
     if day not in dates:
         day -= timedelta(days=1)
         if day not in dates:
@@ -123,7 +125,7 @@ def user_stats(user_id):
             "SELECT session_type, COUNT(*) c FROM sessions WHERE user_id = ? GROUP BY session_type",
             (user_id,),
         ).fetchall()
-        week_ago = (date.today() - timedelta(days=6)).isoformat()
+        week_ago = (today() - timedelta(days=6)).isoformat()
         days_this_week = conn.execute(
             "SELECT COUNT(DISTINCT session_date) c FROM sessions WHERE user_id = ? AND session_date >= ?",
             (user_id, week_ago),
@@ -167,10 +169,10 @@ def recent_sessions(user_id, limit=5):
 
 
 def checked_in_today(user_id):
-    today = date.today().isoformat()
+    session_date = today().isoformat()
     with get_conn() as conn:
         row = conn.execute(
             "SELECT COUNT(*) c FROM sessions WHERE user_id = ? AND session_date = ?",
-            (user_id, today),
+            (user_id, session_date),
         ).fetchone()
     return row["c"] > 0

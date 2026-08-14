@@ -1,17 +1,16 @@
 import logging
 import os
 from datetime import datetime, time
-from zoneinfo import ZoneInfo
 
 import discord
 from discord import app_commands
 from discord.ext import commands, tasks
 
 import db
+from config import TZ
 
 log = logging.getLogger("leetcode-bot")
 
-TZ = ZoneInfo(os.environ.get("APP_TIMEZONE", "UTC"))
 REMINDER_HOUR = int(os.environ.get("REMINDER_HOUR", "18"))
 REMINDER_MINUTE = int(os.environ.get("REMINDER_MINUTE", "0"))
 REMINDER_CHANNEL_ID = int(os.environ["REMINDER_CHANNEL_ID"])
