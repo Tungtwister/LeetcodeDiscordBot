@@ -1,2 +1,7 @@
 discord.py>=2.4
 python-dotenv>=1.0
+
+# Provides the IANA timezone database for zoneinfo. Required on Windows and on slim
+# Linux images, which have no system tz database — without it, ZoneInfo(APP_TIMEZONE)
+# raises at import and the reminders cog fails to load.
+tzdata>=2024.1
