@@ -43,6 +43,22 @@ def get_conn():
 
 
 def init_db():
+    # sqlite3 raises a bare "unable to open database file" when the parent directory
+    # is missing, which is the usual symptom of a persistent volume not being mounted
+    # where DB_PATH expects it. Say so explicitly rather than making someone read a
+    # traceback. Deliberately not creating the directory: on a host with a volume,
+    # silently writing to the container's ephemeral disk would look like it worked
+    # and then lose every check-in on the next deploy.
+    parent = os.path.dirname(DB_PATH)
+    if parent and not os.path.isdir(parent):
+        raise RuntimeError(
+            f"Cannot open the database: directory {parent!r} does not exist "
+            f"(DB_PATH={DB_PATH!r}).\n"
+            f"If this host has a persistent volume, attach it and set its mount path "
+            f"to {parent!r}, or set DB_PATH to wherever the volume is actually "
+            f"mounted. Unset DB_PATH to fall back to a file next to bot.py (not "
+            f"persistent across deploys)."
+        )
     with get_conn() as conn:
         conn.executescript(SCHEMA)
 
